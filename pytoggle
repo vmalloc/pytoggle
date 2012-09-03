@@ -35,7 +35,10 @@ def cmd_alias(args):
 
 def _install_alias(alias_name):
     pytoggle_path = os.path.abspath(os.path.realpath(sys.argv[0]))
-    os.symlink(pytoggle_path, os.path.join(os.path.dirname(pytoggle_path), "aliases", alias_name))
+    aliases_dir = os.path.join(os.path.dirname(pytoggle_path), "aliases")
+    if not os.path.isdir(aliases_dir):
+        os.makedirs(aliases_dir)
+    os.symlink(pytoggle_path, os.path.join(aliases_dir, alias_name))
 
 def alias_main():
     starting_point = _get_starting_point()
