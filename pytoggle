@@ -1,0 +1,115 @@
+#! /usr/local/bin/python2.7
+# -*- mode: python -*-
+import argparse
+import errno
+import os
+import sys
+
+_CONFIG_FILE_NAME = ".pytoggle.cfg"
+
+def main():
+    if os.path.basename(sys.argv[0]) == "pytoggle":
+        return pytoggle_main()
+    return alias_main()
+
+def pytoggle_main():
+    parser = argparse.ArgumentParser(usage="%(prog)s [options] cmd <cmd args>")
+    subparsers = parser.add_subparsers(help="Action to be taken")
+    install_parser = subparsers.add_parser("install", help="install pytoggle")
+    install_parser.set_defaults(cmd=cmd_install)
+    alias_parser = subparsers.add_parser("alias", help="create a new alias")
+    alias_parser.set_defaults(cmd=cmd_alias)
+    alias_parser.add_argument("alias_name")
+
+    args = parser.parse_args()
+    return args.cmd(args)
+
+def cmd_install(args):
+    _install_alias("pytoggle")
+    _install_alias("python")
+    _install_alias("pip")
+    _install_alias("easy_install")
+
+def cmd_alias(args):
+    _install_alias(args.alias_name)
+
+def _install_alias(alias_name):
+    pytoggle_path = os.path.abspath(os.path.realpath(sys.argv[0]))
+    os.symlink(pytoggle_path, os.path.join(os.path.dirname(pytoggle_path), "aliases", alias_name))
+
+def alias_main():
+    starting_point = _get_starting_point()
+    config_file_path = _lookup_config_file(starting_point)
+    if config_file_path is None:
+        _execute_fallback()
+    _execute_with_config_file(config_file_path)
+def _get_starting_point():
+    program = sys.argv[0]
+    if os.path.basename(program) == "python":
+        return _get_python_starting_point()
+    return os.curdir
+
+def _get_python_starting_point():
+    import argparse
+    parser = argparse.ArgumentParser()
+    for flag in "BdEiRsStuvVx3":
+        parser.add_argument("-"+flag, action="store_true", default=False)
+    parser.add_argument("-O", action="append_const", const=1)
+    for flag in "mQW":
+        parser.add_argument("-"+flag, dest="flag_"+flag, default=None)
+    parser.print_help = parser.exit = lambda *args, **kwargs: None
+    parser.add_argument("-c", dest="cmd")
+    parser.add_argument("args", nargs="*", default=[])
+    args, remainder = parser.parse_known_args()
+
+    if args.args and args.args[0] != "-":
+        return args.args[0]
+    return os.curdir
+
+def _execute_fallback():
+    executable_path = os.path.abspath(os.path.dirname(sys.argv[0]))
+    executable = os.path.basename(sys.argv[0])
+    system_path = os.environ.get("PATH")
+    if not system_path:
+        raise NotImplementedError() # pragma: no cover
+    for path in system_path.split(":"):
+        if path == executable_path:
+            continue
+        try:
+            _execute(path)
+        except OSError as e:
+            if e.errno != errno.ENOENT:
+                raise
+    sys.exit("No python installation found!")
+
+def _execute_with_config_file(config_file_path):
+    cfg = _parse_config_file(config_file_path)
+    bin_path = os.path.expandvars(os.path.expanduser(cfg.get("bin_dir", "path")))
+    _execute(bin_path)
+
+
+def _parse_config_file(path):
+    import ConfigParser
+    parser = ConfigParser.ConfigParser()
+    parser.read(path)
+    return parser
+
+def _execute(bin_path):
+    executable = os.path.join(bin_path, os.path.basename(sys.argv[0]))
+    sys.stdout.flush()
+    os.execv(executable, [executable] + sys.argv[1:])
+
+def _lookup_config_file(starting_point):
+    if not os.path.exists(starting_point):
+        return None
+    starting_point = os.path.abspath(starting_point)
+    while True:
+        config_file_path = os.path.join(starting_point, _CONFIG_FILE_NAME)
+        if os.path.exists(config_file_path):
+            return config_file_path
+        if starting_point == "/":
+            return None
+        starting_point = os.path.dirname(starting_point)
+
+if __name__ == '__main__':
+    main()
