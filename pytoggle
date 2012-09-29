@@ -20,7 +20,9 @@ def pytoggle_main():
     alias_parser = subparsers.add_parser("alias", help="create a new alias")
     alias_parser.set_defaults(cmd=cmd_alias)
     alias_parser.add_argument("alias_name")
-
+    which_parser = subparsers.add_parser("which", help="get the currently used Python binary directory")
+    which_parser.add_argument("directory", default=".", nargs="?")
+    which_parser.set_defaults(cmd=cmd_which)
     args = parser.parse_args()
     return args.cmd(args)
 
@@ -32,6 +34,13 @@ def cmd_install(args):
 
 def cmd_alias(args):
     _install_alias(args.alias_name)
+
+def cmd_which(args):
+    directory = args.directory
+    config_file_path = _lookup_config_file(directory)
+    cfg = _parse_config_file(config_file_path)
+    bin_path = os.path.expandvars(os.path.expanduser(cfg.get("bin_dir", "path")))
+    print(bin_path)
 
 def _install_alias(alias_name):
     pytoggle_path = os.path.abspath(os.path.realpath(sys.argv[0]))
