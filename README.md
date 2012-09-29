@@ -6,11 +6,15 @@ As for Python selection, an excellent tool called [Pythonbrew](https://github.co
 
 As for the package sets, another industry-standard tool called [virtualenv](http://pypi.python.org/pypi/virtualenv) enables you to use "virtual pythons" on top of your existing installation to isolate environments. To simplify the workflow, a [wrapper exists](http://www.doughellmann.com/projects/virtualenvwrapper/) that enables you to quickly switch between virtual environments. `pythonbrew` [also includes this functionality](https://github.com/utahta/pythonbrew#commands).
 
-As a command-line-savvy developer you want to be able to access this functionality quickly when running your projects. For instance, you'd like to:
+The typical scenario (at least for some developers) is working on several projects concurrently - some may be for work, some personal, etc. Each set of projects needs its own *virtualenv*. However, the way virtualenv works, you must remember to **activate** the "right" environment before working on a project.
+
+This process may be familiar to you as this sequence of actions:
 
 1. start a shell
 2. `workon` your favorite virtualenv
 3. `python setup.py develop` your project and start working on it.
+
+Although *virtualenvwrapper* and *virtualenv* work quite well, the above sequence has several annoying problems when switching projects and/or shell sessions.
 
 ## Problem no. 1: Wrong Environments
 
