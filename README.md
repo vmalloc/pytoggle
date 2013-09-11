@@ -2,9 +2,9 @@
 
 When developing multiple Python projects concurrently, each having its own separate set of modules/packages which might conflict, and sometimes even its own version of Python, it is very hard to keep track of which Python interpreter and which set of libraries go with each project.
 
-As for Python selection, an excellent tool called [Pythonbrew](https://github.com/utahta/pythonbrew) exists to simplify the installation, usage, and reinstallation of Python versions.
+As for Python selection, an excellent tool called [Pythonz](https://github.com/saghul/pythonz) exists to simplify the installation, usage, and reinstallation of Python versions.
 
-As for the package sets, another industry-standard tool called [virtualenv](http://pypi.python.org/pypi/virtualenv) enables you to use "virtual pythons" on top of your existing installation to isolate environments. To simplify the workflow, a [wrapper exists](http://www.doughellmann.com/projects/virtualenvwrapper/) that enables you to quickly switch between virtual environments. `pythonbrew` [also includes this functionality](https://github.com/utahta/pythonbrew#commands).
+As for the package sets, another industry-standard tool called [virtualenv](http://pypi.python.org/pypi/virtualenv) enables you to use "virtual pythons" on top of your existing installation to isolate environments. To simplify the workflow, a [wrapper exists](http://www.doughellmann.com/projects/virtualenvwrapper/) that enables you to quickly switch between virtual environments.
 
 The typical scenario (at least for some developers) is working on several projects concurrently - some may be for work, some personal, etc. Each set of projects needs its own *virtualenv*. However, the way virtualenv works, you must remember to **activate** the "right" environment before working on a project.
 
@@ -34,7 +34,7 @@ Many solutions involve a shell mode of some sort to switch your default python i
 
 # Using `pytoggle`
 
-`pytoggle` is a very simple utility meant to be used alongside other tools like `pythonbrew`. It borrows the idea of [direnv](https://github.com/zimbatm/direnv) and adapts it to the problems discussed above. It is a "smart shortcut" that deduces the version of python you'd like to run and runs it for you.
+`pytoggle` is a very simple utility meant to be used alongside other tools like `pythonz`. It borrows the idea of [direnv](https://github.com/zimbatm/direnv) and adapts it to the problems discussed above. It is a "smart shortcut" that deduces the version of python you'd like to run and runs it for you.
 
 ## Step 1: Clone the Project
 
@@ -54,15 +54,14 @@ Include this in your shell profile file (`.bashrc` for bash, `.zshrc` for zsh, e
 
 ## Step 3: Specifying your configuration
 
-`pytoggle` works best served with `pythonbrew`. Let's say your project resides in `~/projects/proj1`. You can install a version of python to act as your default, and create a virtualenv for your project:
+`pytoggle` works best served with `pythonz`. Let's say your project resides in `~/projects/proj1`. You can install a version of python to act as your default, and create a virtualenv for your project:
 
-    $ pythonbrew switch 2.7
-    $ pythonbrew venv create proj1_venv
+    $ ~/.pythonz/pythons/CPython-2.7.5/bin/virtualenv proj1_venv
 
-The above will normally create a virtualenv under `~/.pythonbrew/venvs/Python-2.7/proj1_venv/`. Now edit a file named `.pytoggle.cfg` and put it anywhere above your project directory (for instance, in `~/projects/proj1`, or `~/projects/`):
+The above will normally create a virtualenv under `proj1_venv/`. Now edit a file named `.pytoggle.cfg` and put it anywhere above your project directory (for instance, in `~/projects/proj1`, or `~/projects/`):
 
     [bin_dir]
-    path = ~/.pythonbrew/venvs/Python-2.7/proj1_venv/bin
+    path = /path/to/proj1_venv/bin
 
 That's it! Now when you run python from within the `proj1` dir, you'll get the "right" python for you:
 
@@ -72,7 +71,7 @@ That's it! Now when you run python from within the `proj1` dir, you'll get the "
     Type "help", "copyright", "credits" or "license" for more information.
     >>> import sys
     >>> sys.executable
-    '/home/vmalloc/.pythonbrew/venvs/Python-2.7/proj1_venv/bin/python'
+    '/path/to/proj1_venv/bin/python'
     
 Also, when you run a python script in your project directory, the right python interpreter will be used, even if you're not in that directory:
 
